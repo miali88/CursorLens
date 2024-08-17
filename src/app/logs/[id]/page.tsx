@@ -23,11 +23,11 @@ interface Log {
   response: string | null;
 }
 
-interface LogDetailsProps {
-  logId: string;
-}
-
-export default function LogDetails({ logId }: LogDetailsProps) {
+export default function LogDetails({
+  params,
+}: {
+  params: { id: string };
+}) {
   const [log, setLog] = useState<Log | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [theme, setTheme] = useState<SyntaxHighlighterProps["style"] | null>(
@@ -37,18 +37,16 @@ export default function LogDetails({ logId }: LogDetailsProps) {
 
   useEffect(() => {
     const fetchLog = async () => {
-      if (logId) {
-        try {
-          const response = await fetch(`/api/logs/${logId}`);
-          if (!response.ok) {
-            throw new Error("Failed to fetch log");
-          }
-          const logData: Log = await response.json();
-          setLog(logData);
-        } catch (err) {
-          setError("Error fetching log data");
-          console.error(err);
+      try {
+        const response = await fetch(`/api/logs/${params.id}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch log");
         }
+        const logData: Log = await response.json();
+        setLog(logData);
+      } catch (err) {
+        setError("Error fetching log data");
+        console.error(err);
       }
     };
 
@@ -63,7 +61,7 @@ export default function LogDetails({ logId }: LogDetailsProps) {
       );
     };
     loadTheme();
-  }, [logId, searchParams]);
+  }, [params, searchParams]);
 
   if (error) {
     return (
